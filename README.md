@@ -48,9 +48,9 @@ python argparse_ray_main.py \
     --EnergyFunction ChipPlacement \
     --dataset Chip_20_components \
     --train_mode PPO \
-    --n_diffusion_steps 50 \
-    --batch_size 16 \
-    --n_basis_states 10 \
+    --n_diffusion_steps 1000 \
+    --batch_size 32 \
+    --n_basis_states 20 \
     --GPUs 0
 ```
 
@@ -122,3 +122,89 @@ Where:
 - **Diffusion**: 1000 steps, cosine schedule, β_t ∈ [0.0001, 0.02]
 - **Reward Coefficients**: α_noise=0.01, α_ent=0.001
 - **Energy Weights**: λ_overlap=2.0, λ_bound=1.0
+## Benchmark Inference
+
+### Running on Standard Benchmarks
+
+UCP supports inference on ISPD2005 and IBM ICCAD04 benchmarks:
+
+```bash
+python infer_benchmarks.py \
+    --checkpoint logs/ucp_model.ckpt \
+    --benchmark_path ../datasets \
+    --dataset ispd2005 \
+    --output_dir results/ispd2005 \
+    --num_samples 20
+```
+
+### Parsing Raw Benchmarks
+
+Convert DEF files to preprocessed format:
+
+```bash
+python parse_benchmarks.py \
+    --input_dir benchmarks/ispd2005_raw \
+    --output_dir datasets/graph/ispd2005 \
+    --mode clustered \
+    --num_clusters 512
+```
+
+See [BENCHMARK_GUIDE.md](BENCHMARK_GUIDE.md) for detailed instructions.
+
+## Results
+
+Results on standard benchmarks (ISPD2005, IBM ICCAD04):
+
+| Benchmark Suite | HPWL (×10⁵) | Legality | Runtime (min) |
+|----------------|-------------|----------|---------------|
+| IBM Clustered  | 2.84        | 0.998    | 4.4           |
+| IBM Macro-only | 2.35        | 0.999    | 4.4           |
+| ISPD2005       | 44.2        | 0.998    | 21.1          |
+
+*See manuscript for detailed comparison with baselines.*
+
+## Project Structure
+
+```
+UCP/
+├── argparse_ray_main.py          # Main training entry point
+├── train.py                      # Training loop
+├── chip_placement_config.py      # Configuration presets
+├── benchmark_utils.py            # Benchmark data utilities
+├── infer_benchmarks.py           # Benchmark inference script
+├── parse_benchmarks.py           # Raw benchmark parser
+├── EnergyFunctions/
+│   ├── ChipPlacementEnergy.py   # Energy function implementation
+│   └── BaseEnergy.py            # Base energy class
+├── Networks/
+│   ├── DiffModel.py             # GNN diffusion model
+│   └── Modules/                 # GNN components
+├── Trainers/
+│   ├── PPO_Trainer.py           # PPO training algorithm
+│   └── BaseTrainer.py           # Base trainer class
+├── NoiseDistributions/
+│   └── GaussianNoise.py         # Continuous noise distribution
+└── DatasetCreator/
+    └── loadGraphDatasets/       # Synthetic data generation
+```
+
+## Citation
+
+If you use this code in your research, please cite:
+
+```bibtex
+@inproceedings{anonymous2026energy,
+  title={Energy-Guided Continuous Diffusion for Unsupervised Chip Placement},
+  author={Anonymous},
+  booktitle={Design Automation Conference (DAC)},
+  year={2026}
+}
+```
+
+## License
+
+[To be determined upon publication]
+
+## Acknowledgments
+
+This work builds upon advances in diffusion models, reinforcement learning, and physical design automation.
