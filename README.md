@@ -1,4 +1,4 @@
-# Energy-Guided Continuous Diffusion for Chip Placement
+# Energy-Guided Continuous Diffusion for Unsupervised Chip Placement
 
 Official implementation for the paper "Energy-Guided Continuous Diffusion for Unsupervised Chip Placement" (DAC 2026 submission).
 
