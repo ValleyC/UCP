@@ -105,7 +105,7 @@ def generate_curriculum_stage(stage_config, seed, modes, n_workers=None, dataset
     print("="*70 + "\n")
 
     base_config = {
-        'IsingMode': dataset_name,
+        'dataset': dataset_name,
         'seed': seed,
         'save': True,
         'dataset_name': dataset_name,

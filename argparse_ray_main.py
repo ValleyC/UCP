@@ -8,7 +8,7 @@ parser.add_argument('--debug', action='store_true', help='Enable debug mode')
 parser.add_argument('--multi_gpu', action='store_true', help='Enable multi-GPU training')
 parser.add_argument('--mode', default='Diffusion', choices=["Diffusion"], help='Training mode')
 parser.add_argument('--EnergyFunction', default='ChipPlacement', choices=["ChipPlacement"], help='Energy function')
-parser.add_argument('--IsingMode', default='Chip_20_components',
+parser.add_argument('--dataset', default='Chip_20_components',
                     choices=["Chip_dummy", "Chip_small", "Chip_medium", "Chip_large", "Chip_huge",
                              "Chip_20_components", "Chip_50_components", "Chip_100_components",
                              "Chip_v1_curriculum_stage1_n100", "Chip_v1_curriculum_stage2_n150",
@@ -177,7 +177,7 @@ def detect_and_run_for_loops():
 
                                             flexible_config = {
                                                 "mode": args.mode,
-                                                "dataset_name": args.IsingMode,
+                                                "dataset_name": args.dataset,
                                                 "problem_name": args.EnergyFunction,
                                                 "jit": args.jit,
                                                 "wandb": True,

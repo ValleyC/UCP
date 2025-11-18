@@ -31,7 +31,7 @@ This repository contains the implementation of an energy-guided diffusion model 
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd DIffUCO
+cd UCP
 
 # Install dependencies
 pip install -r requirements.txt
@@ -46,7 +46,7 @@ Train on synthetic chip placement instances:
 ```bash
 python argparse_ray_main.py \
     --EnergyFunction ChipPlacement \
-    --IsingMode Chip_20_components \
+    --dataset Chip_20_components \
     --train_mode PPO \
     --n_diffusion_steps 50 \
     --batch_size 16 \
@@ -58,24 +58,33 @@ python argparse_ray_main.py \
 
 Key hyperparameters can be set via command-line arguments or modified in `chip_placement_config.py`:
 
-- `--n_diffusion_steps`: Number of diffusion timesteps (default: 50)
-- `--batch_size`: Number of circuits per batch (default: 16)
-- `--n_basis_states`: Parallel trajectories per circuit (default: 10)
-- `--overlap_weight`: Weight for overlap penalty (default: 50.0)
-- `--boundary_weight`: Weight for boundary penalty (default: 50.0)
+- `--n_diffusion_steps`: Number of diffusion timesteps (default: 1000)
+- `--batch_size`: Number of circuits per batch (default: 32)
+- `--n_basis_states`: Parallel trajectories per circuit (default: 20)
+- `--overlap_weight`: Weight for overlap penalty (default: 2.0)
+- `--boundary_weight`: Weight for boundary penalty (default: 1.0)
+- `--lr`: Learning rate (default: 3e-4)
 
 ### Dataset
 
-The code generates synthetic chip placement instances with realistic characteristics:
-- Component sizes: Clipped exponential distribution
-- Netlist connectivity: Proximity-based k-NN graphs
-- Circuit sizes: 20-100 components (configurable)
+The code generates synthetic chip placement instances with realistic characteristics matching the paper specifications:
 
-Available dataset configurations:
-- `Chip_dummy`: 5 components (fast testing)
-- `Chip_20_components`: 20-50 components (recommended)
-- `Chip_50_components`: 50-100 components
-- `Chip_100_components`: 100-200 components
+**Component Generation:**
+- Circuit sizes: N ~ Uniform(200, 1000) components per instance
+- Component sizes: Clipped exponential distribution with λ ∈ [0.04, 0.08]
+- Size bounds: [s_min, s_max] ∈ [0.01, 1.0]
+- Canvas aspect ratios: Uniform(0.5, 2.0)
+
+**Netlist Connectivity (3 types):**
+- **Local proximity (60%)**: Each component connects to k_local ~ Uniform{2, 4} nearest neighbors
+- **Hierarchical clusters (30%)**: K-means clusters (m ~ Uniform(8, 16) per cluster) with weighted inter-cluster connections
+- **Long-range (10%)**: Random component pairs simulating critical paths
+- **Multi-pin nets**: 30% of 2-pin nets merged (60% → 3-pin, 30% → 4-pin, 10% → 5-pin)
+
+**Training Data:**
+- 20,000 synthetically generated circuits
+- Random initial placements: (x, y) ~ Uniform(-1, 1)
+- Ensures diversity for zero-shot generalization to real benchmarks
 
 ## Architecture
 
@@ -103,9 +112,16 @@ Where:
 ### Training
 
 - **Algorithm**: Proximal Policy Optimization (PPO)
+- **Optimizer**: Adam (lr=3e-4, β₁=0.9, β₂=0.999, ε=1e-8)
+- **PPO Settings**: ε_clip=0.2, 4 epochs per batch, minibatch size=8
 - **Per-Step Energy**: Dense feedback at every diffusion timestep
 - **GAE**: Generalized Advantage Estimation (λ=0.95, γ=0.99)
-- **Learning Rate**: 3×10⁻⁴ with cosine annealing
+- **Value Loss Weight**: c_value=0.5
+- **Gradient Clipping**: Max norm 0.5
+- **Training**: 1000 epochs, batch size 32, 20,000 synthetic circuits
+- **Diffusion**: 1000 steps, cosine schedule, β_t ∈ [0.0001, 0.02]
+- **Reward Coefficients**: α_noise=0.01, α_ent=0.001
+- **Energy Weights**: λ_overlap=2.0, λ_bound=1.0
 
 ## Results
 
@@ -121,7 +137,7 @@ Our method achieves competitive results on synthetic benchmarks:
 ## Project Structure
 
 ```
-DIffUCO/
+UCP/
 ├── argparse_ray_main.py          # Main training entry point
 ├── train.py                      # Training loop
 ├── chip_placement_config.py      # Configuration presets

@@ -30,7 +30,7 @@ def generate_dataset(dataset_name, seed, modes, n_workers=None):
     """Generate chip placement dataset for specified modes"""
 
     base_config = {
-        'IsingMode': dataset_name,
+        'dataset': dataset_name,
         'seed': seed,
         'save': True,
         'dataset_name': dataset_name,
