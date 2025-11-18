@@ -1,0 +1,22 @@
+# Core dependencies
+jax>=0.4.13
+jaxlib>=0.4.13
+flax>=0.7.0
+optax>=0.1.7
+jraph>=0.0.6
+
+# Data processing
+numpy>=1.24.0
+torch>=2.0.0
+shapely>=2.0.0
+networkx>=3.1
+
+# Utilities
+tqdm>=4.65.0
+wandb>=0.15.0
+matplotlib>=3.7.0
+unipath>=1.1
+
+# Optional: For GPU acceleration
+# jaxlib[cuda11_pip]>=0.4.13  # Uncomment for CUDA 11.x
+# jaxlib[cuda12_pip]>=0.4.13  # Uncomment for CUDA 12.x
